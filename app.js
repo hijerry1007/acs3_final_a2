@@ -6,10 +6,8 @@ const port = 3000
 let time = require('express-timestamp')
 app.use(time.init)
 
-// getReqInfo
-let getReqInfo = function getReqInfo(req, res, next) {
-  // console.log(req.originalUrl)
-  // console.log(req.method)
+let getReqInfo = function (req, res, next) {
+
   let moment = req.timestamp.format()
   let array = moment.split('')
   let time = ''
@@ -18,8 +16,19 @@ let getReqInfo = function getReqInfo(req, res, next) {
   array.forEach(item => {
     time += item
   })
-  console.log(`${time}| ${req.method} from ${req.url}`)
-  next()
+
+  req._startTime = new Date() // 請求時間
+  // console.log(req._startTime)
+  function responseTime() {
+    let now = new Date()
+    // console.log(now)
+    let totalTime = now - req._startTime
+    // console.log(totalTime)
+    console.log(`${time}| ${req.method} from ${req.url} | totalTime: ${totalTime} `)
+  }
+  res.once('finish', responseTime)
+  res.once('close', responseTime)
+  return next()
 }
 
 app.use(getReqInfo)
