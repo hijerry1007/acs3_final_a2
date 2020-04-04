@@ -18,16 +18,20 @@ let getReqInfo = function (req, res, next) {
   })
 
   req._startTime = new Date().getTime() // 請求時間
-  console.log(req._startTime)
   function responseTime() {
     let now = new Date().getTime()
-    console.log(now)
     let totalTime = now - req._startTime
     console.log(`${time}| ${req.method} from ${req.url} | totalTime: ${totalTime}ms `)
   }
-  res.once('finish', responseTime)
-  res.once('close', responseTime)
-  return next()
+
+  if (req.url !== '/favicon.ico') {
+    res.once('finish', responseTime)
+    res.once('close', responseTime)
+    return next()
+  } else {
+    return next()
+  }
+
 }
 
 app.use(getReqInfo)
