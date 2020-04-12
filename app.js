@@ -17,16 +17,18 @@ let getReqInfo = function (req, res, next) {
     time += item
   })
 
-  req._startTime = new Date().getTime() // 請求時間
-  function responseTime() {
-    let now = new Date().getTime()
-    let totalTime = now - req._startTime
-    console.log(`${time}| ${req.method} from ${req.url} | totalTime: ${totalTime}ms `)
-  }
+
+  let startTime = process.hrtime()
 
   if (req.url !== '/favicon.ico') {
-    res.once('finish', responseTime)
-    res.once('close', responseTime)
+    res.once('finish', () => {
+      let diff = process.hrtime(startTime)
+      console.log(`${time}| ${req.method} from ${req.url} | totalTime: ${diff[1] / 1000000}ms `)
+    })
+    res.once('close', () => {
+      let diff = process.hrtime(startTime)
+      console.log(`${time}| ${req.method} from ${req.url} | totalTime: ${diff[1] / 1000000}ms `)
+    })
     return next()
   } else {
     return next()
